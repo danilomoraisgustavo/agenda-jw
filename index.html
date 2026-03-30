@@ -1,0 +1,1094 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Estante de Estudo Pessoal</title>
+    <style>
+        :root {
+            --bg: #f4efe7;
+            --wood1: #b07a4b;
+            --wood2: #8c5b36;
+            --wood3: #6f4528;
+            --paper: #fffdf8;
+            --ink: #3a2d24;
+            --accent: #d9c7ac;
+            --line: #e7dfd1;
+            --shadow: rgba(0, 0, 0, 0.18);
+            --gold: #d8b071;
+            --danger: #a94442;
+            --success: #476b4a;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background:
+                linear-gradient(to bottom, #f8f5ef, #efe6d7);
+            color: var(--ink);
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .app-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            background: rgba(255, 255, 255, 0.5);
+            backdrop-filter: blur(6px);
+            position: sticky;
+            top: 0;
+            z-index: 20;
+        }
+
+        .app-header h1 {
+            margin: 0 0 6px;
+            font-size: 28px;
+        }
+
+        .app-header p {
+            margin: 0;
+            color: #5e5145;
+        }
+
+        .toolbar {
+            margin-top: 16px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        button {
+            border: none;
+            border-radius: 12px;
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 14px rgba(0, 0, 0, 0.10);
+        }
+
+        .btn-primary {
+            background: var(--wood2);
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e8ddce;
+            color: var(--ink);
+        }
+
+        .btn-danger {
+            background: #f1d2d0;
+            color: var(--danger);
+        }
+
+        .btn-success {
+            background: #dcead9;
+            color: var(--success);
+        }
+
+        .screen {
+            padding: 28px 24px 40px;
+            min-height: calc(100vh - 120px);
+        }
+
+        /* ESTANTE */
+        .shelf-area {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .shelf-title {
+            margin-bottom: 18px;
+            font-size: 22px;
+        }
+
+        .shelf {
+            position: relative;
+            padding: 24px 20px 50px;
+            border-radius: 18px;
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(255, 255, 255, 0.08));
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45);
+        }
+
+        .shelf-row {
+            min-height: 240px;
+            padding: 24px 20px 30px;
+            border-radius: 16px;
+            background:
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.12), rgba(0, 0, 0, 0.04));
+            position: relative;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: flex-end;
+            gap: 16px;
+        }
+
+        .shelf-row::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            height: 18px;
+            border-radius: 0 0 14px 14px;
+            background: linear-gradient(to bottom, var(--wood1), var(--wood3));
+            box-shadow:
+                0 10px 18px rgba(0, 0, 0, 0.18),
+                inset 0 3px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .notebook-card {
+            width: 110px;
+            height: 180px;
+            border-radius: 8px 14px 14px 8px;
+            position: relative;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 16px 10px;
+            color: #2f241c;
+            font-weight: 700;
+            writing-mode: vertical-rl;
+            transform: rotate(180deg);
+            box-shadow:
+                0 8px 20px var(--shadow),
+                inset 0 0 0 1px rgba(255, 255, 255, 0.2);
+            user-select: none;
+        }
+
+        .notebook-card:hover {
+            transform: rotate(180deg) translateY(-6px);
+        }
+
+        .notebook-card::before {
+            content: "";
+            position: absolute;
+            left: 10px;
+            top: 0;
+            bottom: 0;
+            width: 8px;
+            background: rgba(255, 255, 255, 0.18);
+            border-radius: 6px;
+        }
+
+        .notebook-card::after {
+            content: "";
+            position: absolute;
+            right: -4px;
+            top: 8px;
+            bottom: 8px;
+            width: 6px;
+            border-radius: 10px;
+            background: rgba(0, 0, 0, 0.12);
+        }
+
+        .nb-brown {
+            background: linear-gradient(135deg, #c99a68, #9b6a3e);
+        }
+
+        .nb-cream {
+            background: linear-gradient(135deg, #efe2c9, #d4bea2);
+        }
+
+        .nb-green {
+            background: linear-gradient(135deg, #b8c7a0, #7f9366);
+        }
+
+        .nb-blue {
+            background: linear-gradient(135deg, #b7cad8, #6f8ea4);
+        }
+
+        .nb-rose {
+            background: linear-gradient(135deg, #e1c0bc, #b98079);
+        }
+
+        .nb-dark {
+            background: linear-gradient(135deg, #6f625a, #40362f);
+            color: #f2ece4;
+        }
+
+        .empty-message {
+            padding: 18px;
+            border-radius: 14px;
+            background: rgba(255, 255, 255, 0.6);
+            color: #5e5145;
+            margin-top: 14px;
+        }
+
+        /* CADERNO ABERTO */
+        .notebook-screen {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .notebook-topbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 20px;
+        }
+
+        .notebook-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .notebook-meta input {
+            font-size: 24px;
+            font-weight: 700;
+            border: none;
+            outline: none;
+            background: transparent;
+            color: var(--ink);
+            width: min(460px, 90vw);
+        }
+
+        .notebook-meta small {
+            color: #6d6155;
+        }
+
+        .book {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+            background: #d7c6ae;
+            border-radius: 24px;
+            padding: 18px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.16);
+            position: relative;
+            perspective: 2400px;
+            overflow: hidden;
+        }
+
+        .book::before {
+            content: "";
+            position: absolute;
+            top: 18px;
+            bottom: 18px;
+            left: 50%;
+            width: 18px;
+            transform: translateX(-50%);
+            background:
+                radial-gradient(circle at center, #b8a48c 0 20%, transparent 21% 100%),
+                linear-gradient(to bottom, #bba68c, #987f62);
+            background-size: 18px 24px, 100% 100%;
+            background-repeat: repeat-y, no-repeat;
+            border-radius: 16px;
+            box-shadow: inset 0 0 8px rgba(0, 0, 0, 0.18);
+            z-index: 2;
+        }
+
+        .book-spread {
+            display: contents;
+        }
+
+        .page {
+            min-height: 72vh;
+            background: var(--paper);
+            padding: 26px 26px 24px;
+            position: relative;
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        .page.left {
+            border-radius: 18px 0 0 18px;
+            margin-right: 9px;
+        }
+
+        .page.right {
+            border-radius: 0 18px 18px 0;
+            margin-left: 9px;
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            color: #6f6255;
+            font-size: 13px;
+            border-bottom: 1px solid #e7dece;
+            padding-bottom: 8px;
+        }
+
+        .page-title-input {
+            width: 100%;
+            border: none;
+            outline: none;
+            background: transparent;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--ink);
+            margin-bottom: 10px;
+        }
+
+        .page-editor {
+            width: 100%;
+            min-height: 58vh;
+            resize: none;
+            border: none;
+            outline: none;
+            background:
+                repeating-linear-gradient(to bottom,
+                    transparent 0px,
+                    transparent 28px,
+                    var(--line) 29px,
+                    transparent 30px);
+            line-height: 30px;
+            font-size: 16px;
+            color: var(--ink);
+            padding: 4px 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+        }
+
+        .book-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 18px;
+        }
+
+        .page-counter {
+            text-align: center;
+            margin-top: 14px;
+            color: #6c6055;
+            font-size: 14px;
+        }
+
+        .status {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 14px;
+            color: #6a5b4d;
+        }
+
+        .page-flip {
+            position: absolute;
+            top: 18px;
+            bottom: 18px;
+            width: calc(50% - 9px);
+            z-index: 4;
+            pointer-events: none;
+            transform-style: preserve-3d;
+            will-change: transform, filter;
+        }
+
+        .page-flip.is-next {
+            right: 18px;
+            transform-origin: left center;
+        }
+
+        .page-flip.is-prev {
+            left: 18px;
+            transform-origin: right center;
+        }
+
+        .page-flip.animating-next {
+            animation: flip-next 950ms cubic-bezier(0.22, 0.7, 0.2, 1) forwards;
+        }
+
+        .page-flip.animating-prev {
+            animation: flip-prev 950ms cubic-bezier(0.22, 0.7, 0.2, 1) forwards;
+        }
+
+        .flip-face {
+            position: absolute;
+            inset: 0;
+            backface-visibility: hidden;
+            border-radius: 18px;
+            overflow: hidden;
+            background: var(--paper);
+            box-shadow:
+                inset 0 0 0 1px rgba(0, 0, 0, 0.06),
+                0 14px 28px rgba(80, 53, 28, 0.12);
+        }
+
+        .flip-face.back {
+            transform: rotateY(180deg);
+        }
+
+        .page-flip.is-next .flip-face.front {
+            border-radius: 0 18px 18px 0;
+        }
+
+        .page-flip.is-next .flip-face.back {
+            border-radius: 18px 0 0 18px;
+        }
+
+        .page-flip.is-prev .flip-face.front {
+            border-radius: 18px 0 0 18px;
+        }
+
+        .page-flip.is-prev .flip-face.back {
+            border-radius: 0 18px 18px 0;
+        }
+
+        .flip-shadow {
+            position: absolute;
+            top: 0;
+            bottom: 0;
+            width: 48px;
+            opacity: 0.22;
+            mix-blend-mode: multiply;
+        }
+
+        .page-flip.is-next .flip-shadow {
+            left: 0;
+            background: linear-gradient(to right, rgba(74, 47, 25, 0.28), transparent);
+        }
+
+        .page-flip.is-prev .flip-shadow {
+            right: 0;
+            background: linear-gradient(to left, rgba(74, 47, 25, 0.28), transparent);
+        }
+
+        .page-snapshot {
+            height: 100%;
+            padding: 26px 26px 24px;
+            display: flex;
+            flex-direction: column;
+            color: var(--ink);
+            background:
+                linear-gradient(180deg, rgba(255, 255, 255, 0.78), rgba(255, 253, 248, 0.96));
+        }
+
+        .page-snapshot .page-header {
+            margin-bottom: 12px;
+        }
+
+        .page-snapshot-title {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .page-snapshot-body {
+            flex: 1;
+            white-space: pre-wrap;
+            word-break: break-word;
+            line-height: 30px;
+            font-size: 16px;
+            padding-top: 4px;
+            background:
+                repeating-linear-gradient(to bottom,
+                    transparent 0px,
+                    transparent 28px,
+                    var(--line) 29px,
+                    transparent 30px);
+        }
+
+        .book.is-flipping .page {
+            pointer-events: none;
+        }
+
+        @keyframes flip-next {
+            0% {
+                transform: rotateY(0deg);
+                filter: brightness(1);
+            }
+
+            45% {
+                filter: brightness(0.92);
+            }
+
+            100% {
+                transform: rotateY(-180deg);
+                filter: brightness(1.03);
+            }
+        }
+
+        @keyframes flip-prev {
+            0% {
+                transform: rotateY(0deg);
+                filter: brightness(1);
+            }
+
+            45% {
+                filter: brightness(0.92);
+            }
+
+            100% {
+                transform: rotateY(180deg);
+                filter: brightness(1.03);
+            }
+        }
+
+        @media (max-width: 900px) {
+            .book {
+                grid-template-columns: 1fr;
+                perspective: none;
+                overflow: visible;
+            }
+
+            .book::before {
+                display: none;
+            }
+
+            .book-spread {
+                display: block;
+            }
+
+            .page.left,
+            .page.right {
+                margin: 0;
+                border-radius: 18px;
+            }
+
+            .page.left {
+                margin-bottom: 14px;
+            }
+
+            .page {
+                min-height: 45vh;
+            }
+
+            .page-editor {
+                min-height: 30vh;
+            }
+
+            .page-flip {
+                display: none;
+            }
+
+            .notebook-card {
+                width: 90px;
+                height: 160px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="app-header">
+        <h1>Estudo Pessoal</h1>
+        <p>Uma estante virtual de cadernos para organizar seu estudo.</p>
+        <div class="toolbar">
+            <button class="btn-primary" id="createNotebookBtn">Novo caderno</button>
+            <button class="btn-secondary" id="backToShelfBtnTop" style="display:none;">Voltar para a estante</button>
+        </div>
+    </header>
+
+    <main>
+        <section id="shelfScreen" class="screen">
+            <div class="shelf-area">
+                <div class="shelf-title">Minha estante</div>
+                <div class="shelf">
+                    <div class="shelf-row" id="shelfRow"></div>
+                </div>
+                <div id="emptyMessage" class="empty-message hidden">
+                    Nenhum caderno criado ainda. Clique em <strong>Novo caderno</strong> para começar.
+                </div>
+            </div>
+        </section>
+
+        <section id="notebookScreen" class="screen hidden">
+            <div class="notebook-screen">
+                <div class="notebook-topbar">
+                    <div class="notebook-meta">
+                        <input id="notebookTitle" type="text" placeholder="Título do caderno" />
+                        <small id="notebookInfo">Caderno aberto</small>
+                    </div>
+                    <div class="toolbar">
+                        <button class="btn-secondary" id="backToShelfBtn">Voltar à estante</button>
+                        <button class="btn-success" id="addPagesBtn">Adicionar 2 páginas</button>
+                        <button class="btn-danger" id="deleteNotebookBtn">Excluir caderno</button>
+                    </div>
+                </div>
+
+                <div class="book" id="book">
+                    <div class="book-spread" id="bookSpread">
+                        <div class="page left">
+                            <div class="page-header">
+                                <span>Página esquerda</span>
+                                <span id="leftPageNumber">1</span>
+                            </div>
+                            <input id="leftPageTitle" class="page-title-input" type="text" placeholder="Título da página" />
+                            <textarea id="leftPageContent" class="page-editor" placeholder="Escreva aqui..."></textarea>
+                        </div>
+
+                        <div class="page right">
+                            <div class="page-header">
+                                <span>Página direita</span>
+                                <span id="rightPageNumber">2</span>
+                            </div>
+                            <input id="rightPageTitle" class="page-title-input" type="text"
+                                placeholder="Título da página" />
+                            <textarea id="rightPageContent" class="page-editor"
+                                placeholder="Continue escrevendo aqui..."></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="book-controls">
+                    <button class="btn-secondary" id="prevPagesBtn">◀ Páginas anteriores</button>
+                    <button class="btn-primary" id="saveBtn">Salvar agora</button>
+                    <button class="btn-secondary" id="nextPagesBtn">Próximas páginas ▶</button>
+                </div>
+
+                <div class="page-counter" id="pageCounter">Folhas 1 e 2</div>
+                <div class="status" id="saveStatus">Alterações salvas automaticamente.</div>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const API_BASE = "/api";
+
+        const shelfScreen = document.getElementById("shelfScreen");
+        const notebookScreen = document.getElementById("notebookScreen");
+        const shelfRow = document.getElementById("shelfRow");
+        const emptyMessage = document.getElementById("emptyMessage");
+
+        const createNotebookBtn = document.getElementById("createNotebookBtn");
+        const backToShelfBtn = document.getElementById("backToShelfBtn");
+        const backToShelfBtnTop = document.getElementById("backToShelfBtnTop");
+        const addPagesBtn = document.getElementById("addPagesBtn");
+        const deleteNotebookBtn = document.getElementById("deleteNotebookBtn");
+        const saveBtn = document.getElementById("saveBtn");
+        const prevPagesBtn = document.getElementById("prevPagesBtn");
+        const nextPagesBtn = document.getElementById("nextPagesBtn");
+
+        const notebookTitle = document.getElementById("notebookTitle");
+        const notebookInfo = document.getElementById("notebookInfo");
+        const leftPageNumber = document.getElementById("leftPageNumber");
+        const rightPageNumber = document.getElementById("rightPageNumber");
+        const leftPageTitle = document.getElementById("leftPageTitle");
+        const rightPageTitle = document.getElementById("rightPageTitle");
+        const leftPageContent = document.getElementById("leftPageContent");
+        const rightPageContent = document.getElementById("rightPageContent");
+        const pageCounter = document.getElementById("pageCounter");
+        const saveStatus = document.getElementById("saveStatus");
+        const book = document.getElementById("book");
+
+        let appData = { notebooks: [] };
+        let currentNotebookId = null;
+        let currentSpreadStart = 0;
+        let saveTimer = null;
+        let isPageFlipping = false;
+
+        function setStatus(message, isError = false) {
+            saveStatus.textContent = message;
+            saveStatus.style.color = isError ? "var(--danger)" : "#6a5b4d";
+        }
+
+        async function fetchJson(url, options = {}) {
+            const response = await fetch(url, {
+                ...options,
+                headers: {
+                    "Content-Type": "application/json",
+                    ...(options.headers || {})
+                }
+            });
+
+            if (response.status === 204) {
+                return null;
+            }
+
+            const isJson = response.headers.get("content-type")?.includes("application/json");
+            const data = isJson ? await response.json() : null;
+
+            if (!response.ok) {
+                throw new Error(data?.error || "Não foi possível concluir a operação.");
+            }
+
+            return data;
+        }
+
+        function updateNotebookInState(notebook) {
+            const index = appData.notebooks.findIndex((item) => item.id === notebook.id);
+
+            if (index >= 0) {
+                appData.notebooks[index] = notebook;
+                return;
+            }
+
+            appData.notebooks.push(notebook);
+        }
+
+        function getCurrentNotebook() {
+            return appData.notebooks.find((nb) => nb.id === currentNotebookId);
+        }
+
+        function renderShelf() {
+            shelfRow.innerHTML = "";
+
+            if (!appData.notebooks.length) {
+                emptyMessage.classList.remove("hidden");
+                return;
+            }
+
+            emptyMessage.classList.add("hidden");
+
+            appData.notebooks.forEach((notebook) => {
+                const card = document.createElement("div");
+                card.className = `notebook-card ${notebook.color}`;
+                card.textContent = notebook.title;
+                card.title = `Abrir ${notebook.title}`;
+                card.addEventListener("click", () => openNotebook(notebook.id));
+                shelfRow.appendChild(card);
+            });
+        }
+
+        function showShelf() {
+            shelfScreen.classList.remove("hidden");
+            notebookScreen.classList.add("hidden");
+            backToShelfBtnTop.style.display = "none";
+            renderShelf();
+        }
+
+        function showNotebookScreen() {
+            shelfScreen.classList.add("hidden");
+            notebookScreen.classList.remove("hidden");
+            backToShelfBtnTop.style.display = "inline-block";
+        }
+
+        function openNotebook(id) {
+            currentNotebookId = id;
+            currentSpreadStart = 0;
+            showNotebookScreen();
+            renderCurrentNotebook();
+        }
+
+        function renderCurrentNotebook() {
+            const notebook = getCurrentNotebook();
+            if (!notebook) return;
+
+            renderNotebookSpread(notebook, currentSpreadStart);
+        }
+
+        function getSpreadData(notebook, startIndex) {
+            const leftIndex = startIndex;
+            const rightIndex = startIndex + 1;
+
+            return {
+                leftIndex,
+                rightIndex,
+                leftPage: notebook.pages[leftIndex] || { title: "", content: "" },
+                rightPage: notebook.pages[rightIndex] || { title: "", content: "" }
+            };
+        }
+
+        function renderNotebookSpread(notebook, startIndex) {
+            const spread = getSpreadData(notebook, startIndex);
+
+            notebookTitle.value = notebook.title;
+            notebookInfo.textContent = `${notebook.pages.length} páginas salvas`;
+
+            leftPageNumber.textContent = spread.leftIndex + 1;
+            rightPageNumber.textContent = spread.rightIndex + 1;
+
+            leftPageTitle.value = spread.leftPage.title || "";
+            rightPageTitle.value = spread.rightPage.title || "";
+            leftPageContent.value = spread.leftPage.content || "";
+            rightPageContent.value = spread.rightPage.content || "";
+
+            pageCounter.textContent = `Folhas ${spread.leftIndex + 1} e ${spread.rightIndex + 1}`;
+
+            prevPagesBtn.disabled = isPageFlipping || startIndex === 0;
+            nextPagesBtn.disabled = isPageFlipping || spread.rightIndex >= notebook.pages.length - 1;
+        }
+
+        function createPageSnapshot(label, number, page) {
+            return `
+                <div class="page-snapshot">
+                    <div class="page-header">
+                        <span>${label}</span>
+                        <span>${number}</span>
+                    </div>
+                    <div class="page-snapshot-title">${escapeHtml(page.title || "")}</div>
+                    <div class="page-snapshot-body">${escapeHtml(page.content || "")}</div>
+                </div>
+            `;
+        }
+
+        function escapeHtml(value) {
+            return value
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+        function animatePageTurn(direction, targetSpreadStart) {
+            if (window.innerWidth <= 900 || isPageFlipping) {
+                currentSpreadStart = targetSpreadStart;
+                renderCurrentNotebook();
+                return;
+            }
+
+            const notebook = getCurrentNotebook();
+            if (!notebook) return;
+
+            const currentSpread = getSpreadData(notebook, currentSpreadStart);
+            const targetSpread = getSpreadData(notebook, targetSpreadStart);
+            const flip = document.createElement("div");
+            const isNext = direction === "next";
+
+            flip.className = `page-flip ${isNext ? "is-next animating-next" : "is-prev animating-prev"}`;
+            flip.innerHTML = `
+                <div class="flip-face front">
+                    ${createPageSnapshot(
+                        isNext ? "Página direita" : "Página esquerda",
+                        isNext ? currentSpread.rightIndex + 1 : currentSpread.leftIndex + 1,
+                        isNext ? currentSpread.rightPage : currentSpread.leftPage
+                    )}
+                    <div class="flip-shadow"></div>
+                </div>
+                <div class="flip-face back">
+                    ${createPageSnapshot(
+                        isNext ? "Página esquerda" : "Página direita",
+                        isNext ? targetSpread.leftIndex + 1 : targetSpread.rightIndex + 1,
+                        isNext ? targetSpread.leftPage : targetSpread.rightPage
+                    )}
+                    <div class="flip-shadow"></div>
+                </div>
+            `;
+
+            isPageFlipping = true;
+            book.classList.add("is-flipping");
+
+            currentSpreadStart = targetSpreadStart;
+            renderNotebookSpread(notebook, targetSpreadStart);
+            book.appendChild(flip);
+
+            flip.addEventListener("animationend", () => {
+                flip.remove();
+                isPageFlipping = false;
+                book.classList.remove("is-flipping");
+                renderCurrentNotebook();
+            }, { once: true });
+        }
+
+        function ensurePageExists(notebook, index) {
+            while (notebook.pages.length <= index) {
+                notebook.pages.push({
+                    title: `Página ${notebook.pages.length + 1}`,
+                    content: ""
+                });
+            }
+        }
+
+        function normalizeNotebookForSave(notebook) {
+            return {
+                title: (notebook.title || "").trim() || "Sem título",
+                color: notebook.color,
+                pages: notebook.pages.map((page, index) => ({
+                    pageNumber: index + 1,
+                    title: (page.title || "").trim(),
+                    content: page.content || ""
+                }))
+            };
+        }
+
+        async function syncNotebook(notebook, successMessage = "Caderno salvo com sucesso.") {
+            const payload = normalizeNotebookForSave(notebook);
+            const data = await fetchJson(`${API_BASE}/notebooks/${notebook.id}`, {
+                method: "PUT",
+                body: JSON.stringify(payload)
+            });
+
+            updateNotebookInState(data.notebook);
+            setStatus(successMessage);
+            return data.notebook;
+        }
+
+        async function saveCurrentSpread(successMessage = "Caderno salvo com sucesso.") {
+            const notebook = getCurrentNotebook();
+            if (!notebook) return null;
+
+            const leftIndex = currentSpreadStart;
+            const rightIndex = currentSpreadStart + 1;
+
+            ensurePageExists(notebook, leftIndex);
+            ensurePageExists(notebook, rightIndex);
+
+            notebook.title = notebookTitle.value.trim() || "Sem título";
+            notebook.pages[leftIndex].title = leftPageTitle.value.trim();
+            notebook.pages[leftIndex].content = leftPageContent.value;
+            notebook.pages[rightIndex].title = rightPageTitle.value.trim();
+            notebook.pages[rightIndex].content = rightPageContent.value;
+
+            const savedNotebook = await syncNotebook(notebook, successMessage);
+            notebookInfo.textContent = `${savedNotebook.pages.length} páginas salvas`;
+            return savedNotebook;
+        }
+
+        function autoSave() {
+            clearTimeout(saveTimer);
+            setStatus("Salvando...");
+
+            saveTimer = setTimeout(async () => {
+                try {
+                    await saveCurrentSpread("Alterações salvas automaticamente.");
+                } catch (error) {
+                    handleError(error);
+                }
+            }, 500);
+        }
+
+        async function createNotebook() {
+            const title = prompt("Digite o nome do novo caderno:", "Novo Caderno");
+            if (title === null) return;
+
+            try {
+                const data = await fetchJson(`${API_BASE}/notebooks`, {
+                    method: "POST",
+                    body: JSON.stringify({ title: title.trim() || "Novo Caderno" })
+                });
+
+                updateNotebookInState(data.notebook);
+                renderShelf();
+                openNotebook(data.notebook.id);
+                setStatus("Novo caderno criado.");
+            } catch (error) {
+                handleError(error);
+            }
+        }
+
+        async function addPages() {
+            const notebook = getCurrentNotebook();
+            if (!notebook) return;
+
+            try {
+                const currentLength = notebook.pages.length;
+                notebook.pages.push(
+                    { title: `Página ${currentLength + 1}`, content: "" },
+                    { title: `Página ${currentLength + 2}`, content: "" }
+                );
+
+                await syncNotebook(notebook, "Novas páginas adicionadas.");
+                renderCurrentNotebook();
+            } catch (error) {
+                handleError(error);
+            }
+        }
+
+        async function goNextPages() {
+            const notebook = getCurrentNotebook();
+            if (!notebook || isPageFlipping) return;
+
+            try {
+                await saveCurrentSpread();
+                if (currentSpreadStart + 2 < notebook.pages.length) {
+                    animatePageTurn("next", currentSpreadStart + 2);
+                }
+            } catch (error) {
+                handleError(error);
+            }
+        }
+
+        async function goPrevPages() {
+            if (isPageFlipping) return;
+
+            try {
+                await saveCurrentSpread();
+                if (currentSpreadStart >= 2) {
+                    animatePageTurn("prev", currentSpreadStart - 2);
+                }
+            } catch (error) {
+                handleError(error);
+            }
+        }
+
+        async function deleteCurrentNotebook() {
+            const notebook = getCurrentNotebook();
+            if (!notebook) return;
+
+            const confirmed = confirm(`Deseja realmente excluir o caderno "${notebook.title}"?`);
+            if (!confirmed) return;
+
+            try {
+                await fetchJson(`${API_BASE}/notebooks/${notebook.id}`, {
+                    method: "DELETE"
+                });
+
+                appData.notebooks = appData.notebooks.filter((nb) => nb.id !== notebook.id);
+                currentNotebookId = null;
+                showShelf();
+                setStatus("Caderno excluído.");
+            } catch (error) {
+                handleError(error);
+            }
+        }
+
+        async function goBackToShelf() {
+            if (currentNotebookId) {
+                try {
+                    await saveCurrentSpread();
+                } catch (error) {
+                    handleError(error);
+                    return;
+                }
+            }
+
+            showShelf();
+        }
+
+        function handleError(error) {
+            console.error(error);
+            setStatus(error.message || "Ocorreu um erro inesperado.", true);
+        }
+
+        async function bootstrap() {
+            try {
+                setStatus("Carregando cadernos...");
+                const data = await fetchJson(`${API_BASE}/notebooks`);
+                appData.notebooks = data.notebooks || [];
+                renderShelf();
+                setStatus("Cadernos carregados.");
+            } catch (error) {
+                handleError(error);
+            }
+        }
+
+        createNotebookBtn.addEventListener("click", createNotebook);
+        backToShelfBtn.addEventListener("click", goBackToShelf);
+        backToShelfBtnTop.addEventListener("click", goBackToShelf);
+        addPagesBtn.addEventListener("click", addPages);
+        deleteNotebookBtn.addEventListener("click", deleteCurrentNotebook);
+        saveBtn.addEventListener("click", async () => {
+            try {
+                await saveCurrentSpread("Caderno salvo manualmente.");
+            } catch (error) {
+                handleError(error);
+            }
+        });
+        prevPagesBtn.addEventListener("click", goPrevPages);
+        nextPagesBtn.addEventListener("click", goNextPages);
+
+        [
+            notebookTitle,
+            leftPageTitle,
+            rightPageTitle,
+            leftPageContent,
+            rightPageContent
+        ].forEach((el) => {
+            el.addEventListener("input", autoSave);
+        });
+
+        bootstrap();
+    </script>
+</body>
+
+</html>
