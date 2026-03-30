@@ -64,6 +64,25 @@
             gap: 10px;
         }
 
+        .header-row {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 16px;
+        }
+
+        .header-user {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .header-user span {
+            font-size: 14px;
+            color: #5e5145;
+        }
+
         button {
             border: none;
             border-radius: 12px;
@@ -101,6 +120,87 @@
         .screen {
             padding: 28px 24px 40px;
             min-height: calc(100vh - 120px);
+        }
+
+        .auth-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding-top: 48px;
+        }
+
+        .auth-card {
+            width: min(480px, 100%);
+            background: rgba(255, 253, 248, 0.92);
+            border: 1px solid rgba(111, 69, 40, 0.1);
+            border-radius: 24px;
+            box-shadow: 0 22px 44px rgba(58, 45, 36, 0.12);
+            padding: 28px;
+        }
+
+        .auth-card h2 {
+            margin: 0 0 10px;
+            font-size: 28px;
+        }
+
+        .auth-card p {
+            margin: 0 0 20px;
+            color: #6c6055;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 18px;
+        }
+
+        .auth-tab {
+            flex: 1;
+        }
+
+        .auth-tab.is-active {
+            background: var(--wood2);
+            color: #fff;
+        }
+
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .auth-form label {
+            font-size: 14px;
+            color: #5e5145;
+        }
+
+        .auth-form input {
+            width: 100%;
+            margin-top: 6px;
+            border: 1px solid #d9cdbc;
+            border-radius: 12px;
+            padding: 12px 14px;
+            font-size: 15px;
+            background: #fffefb;
+            color: var(--ink);
+            outline: none;
+        }
+
+        .auth-form input:focus {
+            border-color: var(--wood2);
+            box-shadow: 0 0 0 3px rgba(176, 122, 75, 0.12);
+        }
+
+        .auth-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 8px;
+        }
+
+        .auth-note {
+            margin-top: 12px;
+            font-size: 13px;
+            color: #77695c;
         }
 
         /* ESTANTE */
@@ -344,7 +444,6 @@
         .page-editor {
             width: 100%;
             min-height: 58vh;
-            resize: none;
             border: none;
             outline: none;
             background:
@@ -356,8 +455,148 @@
             line-height: 30px;
             font-size: 16px;
             color: var(--ink);
-            padding: 4px 0;
+            padding: 4px 0 12px;
             font-family: "Segoe UI", Arial, sans-serif;
+            overflow-wrap: break-word;
+            cursor: text;
+        }
+
+        .page-editor:empty::before {
+            content: attr(data-placeholder);
+            color: #8b7b6b;
+        }
+
+        .page-editor p {
+            margin: 0 0 8px;
+            min-height: 30px;
+        }
+
+        .page-editor::after,
+        .page-snapshot-body::after {
+            content: "";
+            display: block;
+            clear: both;
+        }
+
+        .page-editor figure {
+            margin-top: 6px;
+            margin-bottom: 12px;
+        }
+
+        .page-image {
+            position: relative;
+            width: min(220px, 55%);
+            max-width: 55%;
+            min-width: 120px;
+            border-radius: 14px;
+            overflow: hidden;
+            background: #f3eadc;
+            border: 1px solid rgba(88, 66, 44, 0.14);
+            box-shadow: 0 10px 24px rgba(80, 53, 28, 0.12);
+            clear: none;
+        }
+
+        .page-image[data-align="left"] {
+            float: left;
+            margin-right: 16px;
+        }
+
+        .page-image[data-align="right"] {
+            float: right;
+            margin-left: 16px;
+        }
+
+        .page-image img {
+            display: block;
+            width: 100%;
+            height: auto;
+            user-select: none;
+            pointer-events: none;
+        }
+
+        .page-image.is-dragging {
+            opacity: 0.55;
+        }
+
+        .page-image-toolbar {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            display: flex;
+            gap: 6px;
+            z-index: 2;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .page-image:hover .page-image-toolbar,
+        .page-image.is-selected .page-image-toolbar {
+            opacity: 1;
+        }
+
+        .image-tool-btn {
+            border: none;
+            border-radius: 999px;
+            padding: 6px 8px;
+            font-size: 11px;
+            background: rgba(58, 45, 36, 0.86);
+            color: #fff;
+            cursor: pointer;
+            box-shadow: none;
+            transform: none;
+        }
+
+        .image-tool-btn:hover {
+            box-shadow: none;
+            transform: none;
+            background: rgba(58, 45, 36, 1);
+        }
+
+        .image-resize-handle {
+            position: absolute;
+            width: 16px;
+            height: 16px;
+            right: 6px;
+            bottom: 6px;
+            border-radius: 50%;
+            background: rgba(58, 45, 36, 0.9);
+            border: 2px solid #fff;
+            cursor: nwse-resize;
+            z-index: 2;
+        }
+
+        .page-image-drop-target {
+            outline: 2px dashed rgba(111, 69, 40, 0.28);
+            outline-offset: 8px;
+        }
+
+        .page-snapshot-body p {
+            margin: 0 0 8px;
+            min-height: 30px;
+        }
+
+        .snapshot-image {
+            width: min(190px, 50%);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 18px rgba(80, 53, 28, 0.1);
+            margin-bottom: 12px;
+        }
+
+        .snapshot-image img {
+            display: block;
+            width: 100%;
+            height: auto;
+        }
+
+        .snapshot-image.align-left {
+            float: left;
+            margin-right: 14px;
+        }
+
+        .snapshot-image.align-right {
+            float: right;
+            margin-left: 14px;
         }
 
         .book-controls {
@@ -580,16 +819,59 @@
 
 <body>
     <header class="app-header">
-        <h1>Estudo Pessoal</h1>
-        <p>Uma estante virtual de cadernos para organizar seu estudo.</p>
+        <div class="header-row">
+            <div>
+                <h1>Estudo Pessoal</h1>
+                <p>Uma estante virtual de cadernos para organizar seu estudo.</p>
+            </div>
+            <div class="header-user">
+                <span id="currentUserLabel" class="hidden"></span>
+                <button class="btn-secondary hidden" id="logoutBtn">Sair</button>
+            </div>
+        </div>
         <div class="toolbar">
-            <button class="btn-primary" id="createNotebookBtn">Novo caderno</button>
-            <button class="btn-secondary" id="backToShelfBtnTop" style="display:none;">Voltar para a estante</button>
+            <button class="btn-primary hidden" id="createNotebookBtn">Novo caderno</button>
+            <button class="btn-secondary hidden" id="backToShelfBtnTop" style="display:none;">Voltar para a estante</button>
         </div>
     </header>
 
     <main>
-        <section id="shelfScreen" class="screen">
+        <section id="authScreen" class="screen auth-screen">
+            <div class="auth-card">
+                <h2 id="authTitle">Entre na sua agenda</h2>
+                <p id="authSubtitle">Cada pessoa verá apenas os próprios cadernos e páginas.</p>
+
+                <div class="auth-tabs">
+                    <button class="auth-tab btn-secondary is-active" id="showLoginBtn" type="button">Login</button>
+                    <button class="auth-tab btn-secondary" id="showRegisterBtn" type="button">Cadastro</button>
+                </div>
+
+                <form id="authForm" class="auth-form">
+                    <label id="authNameField" class="hidden">
+                        Nome
+                        <input id="authName" type="text" autocomplete="name" />
+                    </label>
+
+                    <label>
+                        E-mail
+                        <input id="authEmail" type="email" autocomplete="email" required />
+                    </label>
+
+                    <label>
+                        Senha
+                        <input id="authPassword" type="password" autocomplete="current-password" required />
+                    </label>
+
+                    <div class="auth-actions">
+                        <button class="btn-primary" id="authSubmitBtn" type="submit">Entrar</button>
+                    </div>
+                </form>
+
+                <div class="auth-note" id="authStatus">Faça login para acessar seus cadernos pessoais.</div>
+            </div>
+        </section>
+
+        <section id="shelfScreen" class="screen hidden">
             <div class="shelf-area">
                 <div class="shelf-title">Minha estante</div>
                 <div class="shelf">
@@ -611,6 +893,8 @@
                     <div class="toolbar">
                         <button class="btn-secondary" id="backToShelfBtn">Voltar à estante</button>
                         <button class="btn-success" id="addPagesBtn">Adicionar 2 páginas</button>
+                        <button class="btn-secondary" id="insertImageLeftBtn">Imagem à esquerda</button>
+                        <button class="btn-secondary" id="insertImageRightBtn">Imagem à direita</button>
                         <button class="btn-danger" id="deleteNotebookBtn">Excluir caderno</button>
                     </div>
                 </div>
@@ -623,7 +907,8 @@
                                 <span id="leftPageNumber">1</span>
                             </div>
                             <input id="leftPageTitle" class="page-title-input" type="text" placeholder="Título da página" />
-                            <textarea id="leftPageContent" class="page-editor" placeholder="Escreva aqui..."></textarea>
+                            <div id="leftPageContent" class="page-editor" contenteditable="true"
+                                data-placeholder="Escreva aqui..."></div>
                         </div>
 
                         <div class="page right">
@@ -633,8 +918,8 @@
                             </div>
                             <input id="rightPageTitle" class="page-title-input" type="text"
                                 placeholder="Título da página" />
-                            <textarea id="rightPageContent" class="page-editor"
-                                placeholder="Continue escrevendo aqui..."></textarea>
+                            <div id="rightPageContent" class="page-editor" contenteditable="true"
+                                data-placeholder="Continue escrevendo aqui..."></div>
                         </div>
                     </div>
                 </div>
@@ -651,22 +936,41 @@
         </section>
     </main>
 
+    <input id="imagePicker" type="file" accept="image/*" class="hidden" />
+
     <script>
         const API_BASE = "/api";
 
+        const authScreen = document.getElementById("authScreen");
         const shelfScreen = document.getElementById("shelfScreen");
         const notebookScreen = document.getElementById("notebookScreen");
         const shelfRow = document.getElementById("shelfRow");
         const emptyMessage = document.getElementById("emptyMessage");
 
+        const currentUserLabel = document.getElementById("currentUserLabel");
         const createNotebookBtn = document.getElementById("createNotebookBtn");
         const backToShelfBtn = document.getElementById("backToShelfBtn");
         const backToShelfBtnTop = document.getElementById("backToShelfBtnTop");
+        const logoutBtn = document.getElementById("logoutBtn");
         const addPagesBtn = document.getElementById("addPagesBtn");
+        const insertImageLeftBtn = document.getElementById("insertImageLeftBtn");
+        const insertImageRightBtn = document.getElementById("insertImageRightBtn");
         const deleteNotebookBtn = document.getElementById("deleteNotebookBtn");
         const saveBtn = document.getElementById("saveBtn");
         const prevPagesBtn = document.getElementById("prevPagesBtn");
         const nextPagesBtn = document.getElementById("nextPagesBtn");
+        const imagePicker = document.getElementById("imagePicker");
+        const showLoginBtn = document.getElementById("showLoginBtn");
+        const showRegisterBtn = document.getElementById("showRegisterBtn");
+        const authForm = document.getElementById("authForm");
+        const authTitle = document.getElementById("authTitle");
+        const authSubtitle = document.getElementById("authSubtitle");
+        const authStatus = document.getElementById("authStatus");
+        const authSubmitBtn = document.getElementById("authSubmitBtn");
+        const authNameField = document.getElementById("authNameField");
+        const authName = document.getElementById("authName");
+        const authEmail = document.getElementById("authEmail");
+        const authPassword = document.getElementById("authPassword");
 
         const notebookTitle = document.getElementById("notebookTitle");
         const notebookInfo = document.getElementById("notebookInfo");
@@ -681,14 +985,25 @@
         const book = document.getElementById("book");
 
         let appData = { notebooks: [] };
+        let currentUser = null;
         let currentNotebookId = null;
         let currentSpreadStart = 0;
         let saveTimer = null;
         let isPageFlipping = false;
+        let activeEditor = leftPageContent;
+        let pendingImageAlign = "left";
+        let draggedImageId = null;
+        let resizingState = null;
+        let authMode = "login";
 
         function setStatus(message, isError = false) {
             saveStatus.textContent = message;
             saveStatus.style.color = isError ? "var(--danger)" : "#6a5b4d";
+        }
+
+        function setAuthStatus(message, isError = false) {
+            authStatus.textContent = message;
+            authStatus.style.color = isError ? "var(--danger)" : "#77695c";
         }
 
         async function fetchJson(url, options = {}) {
@@ -708,6 +1023,9 @@
             const data = isJson ? await response.json() : null;
 
             if (!response.ok) {
+                if (response.status === 401) {
+                    handleUnauthorized();
+                }
                 throw new Error(data?.error || "Não foi possível concluir a operação.");
             }
 
@@ -727,6 +1045,213 @@
 
         function getCurrentNotebook() {
             return appData.notebooks.find((nb) => nb.id === currentNotebookId);
+        }
+
+        function createDefaultPageContent() {
+            return "<p><br></p>";
+        }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#39;");
+        }
+
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        function plainTextToHtml(value) {
+            const normalized = String(value || "").replace(/\r\n/g, "\n").trim();
+            if (!normalized) {
+                return createDefaultPageContent();
+            }
+
+            return normalized
+                .split(/\n{2,}/)
+                .map((paragraph) => `<p>${escapeHtml(paragraph).replace(/\n/g, "<br>")}</p>`)
+                .join("");
+        }
+
+        function getNodeText(node) {
+            if (!node) {
+                return "";
+            }
+
+            if (node.nodeType === Node.TEXT_NODE) {
+                return node.textContent || "";
+            }
+
+            return node.innerText || node.textContent || "";
+        }
+
+        function createImageFigureMarkup({ src, align = "left", width = 220, alt = "" }) {
+            const safeAlign = align === "right" ? "right" : "left";
+            const safeWidth = clamp(Number(width) || 220, 120, 320);
+            return `
+                <figure class="page-image" contenteditable="false" draggable="true" data-align="${safeAlign}" data-width="${safeWidth}" style="width:${safeWidth}px;">
+                    <img src="${escapeHtml(src)}" alt="${escapeHtml(alt || "Imagem da página")}" />
+                    <div class="page-image-toolbar">
+                        <button type="button" class="image-tool-btn" data-image-action="left">Esq</button>
+                        <button type="button" class="image-tool-btn" data-image-action="right">Dir</button>
+                        <button type="button" class="image-tool-btn" data-image-action="remove">Rem</button>
+                    </div>
+                    <div class="image-resize-handle" data-image-action="resize"></div>
+                </figure>
+            `;
+        }
+
+        function normalizeFigureElement(figure) {
+            const img = figure.querySelector("img");
+            if (!img?.src) {
+                return "";
+            }
+
+            return createImageFigureMarkup({
+                src: img.src,
+                alt: img.alt || "Imagem da página",
+                align: figure.dataset.align || "left",
+                width: figure.dataset.width || figure.style.width
+            });
+        }
+
+        function normalizeStoredContent(content) {
+            const source = String(content || "").trim();
+            if (!source) {
+                return createDefaultPageContent();
+            }
+
+            if (!/[<>]/.test(source)) {
+                return plainTextToHtml(source);
+            }
+
+            const parser = document.createElement("div");
+            parser.innerHTML = source;
+            const fragments = [];
+
+            Array.from(parser.childNodes).forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE && node.matches("figure.page-image")) {
+                    const normalizedFigure = normalizeFigureElement(node);
+                    if (normalizedFigure) {
+                        fragments.push(normalizedFigure);
+                    }
+                    return;
+                }
+
+                const text = getNodeText(node).replace(/\r\n/g, "\n");
+                if (!text.trim()) {
+                    return;
+                }
+
+                fragments.push(plainTextToHtml(text));
+            });
+
+            return fragments.join("") || createDefaultPageContent();
+        }
+
+        function serializeEditorContent(editor) {
+            const blocks = [];
+
+            Array.from(editor.childNodes).forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE && node.matches("figure.page-image")) {
+                    const normalizedFigure = normalizeFigureElement(node);
+                    if (normalizedFigure) {
+                        blocks.push(normalizedFigure);
+                    }
+                    return;
+                }
+
+                const text = getNodeText(node).replace(/\u00a0/g, " ").replace(/\r\n/g, "\n");
+                if (text.trim()) {
+                    blocks.push(
+                        `<p>${escapeHtml(text.trim()).replace(/\n/g, "<br>")}</p>`
+                    );
+                }
+            });
+
+            return blocks.join("") || createDefaultPageContent();
+        }
+
+        function renderEditorContent(editor, content) {
+            editor.innerHTML = normalizeStoredContent(content);
+            ensureEditorStructure(editor);
+            decorateEditorImages(editor);
+        }
+
+        function ensureEditorStructure(editor) {
+            if (!editor.childNodes.length) {
+                editor.innerHTML = createDefaultPageContent();
+                return;
+            }
+
+            const hasTextBlock = Array.from(editor.childNodes).some((node) => {
+                return node.nodeType === Node.ELEMENT_NODE && !node.matches("figure.page-image");
+            });
+
+            if (!hasTextBlock) {
+                const paragraph = document.createElement("p");
+                paragraph.innerHTML = "<br>";
+                editor.appendChild(paragraph);
+            }
+        }
+
+        function decorateEditorImages(editor) {
+            editor.querySelectorAll("figure.page-image").forEach((figure) => {
+                figure.setAttribute("contenteditable", "false");
+                figure.setAttribute("draggable", "true");
+                figure.dataset.align = figure.dataset.align === "right" ? "right" : "left";
+                figure.dataset.width = clamp(Number(figure.dataset.width) || parseInt(figure.style.width, 10) || 220, 120, 320);
+                figure.style.width = `${figure.dataset.width}px`;
+
+                if (!figure.querySelector(".page-image-toolbar")) {
+                    figure.insertAdjacentHTML("beforeend", `
+                        <div class="page-image-toolbar">
+                            <button type="button" class="image-tool-btn" data-image-action="left">Esq</button>
+                            <button type="button" class="image-tool-btn" data-image-action="right">Dir</button>
+                            <button type="button" class="image-tool-btn" data-image-action="remove">Rem</button>
+                        </div>
+                    `);
+                }
+
+                if (!figure.querySelector(".image-resize-handle")) {
+                    figure.insertAdjacentHTML("beforeend", `<div class="image-resize-handle" data-image-action="resize"></div>`);
+                }
+            });
+        }
+
+        function getSnapshotMarkup(content) {
+            const parser = document.createElement("div");
+            parser.innerHTML = normalizeStoredContent(content);
+            const fragments = [];
+
+            Array.from(parser.childNodes).forEach((node) => {
+                if (node.nodeType === Node.ELEMENT_NODE && node.matches("figure.page-image")) {
+                    const img = node.querySelector("img");
+                    if (!img?.src) {
+                        return;
+                    }
+
+                    const align = node.dataset.align === "right" ? "right" : "left";
+                    fragments.push(`
+                        <figure class="snapshot-image align-${align}">
+                            <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.alt || "Imagem da página")}" />
+                        </figure>
+                    `);
+                    return;
+                }
+
+                const text = getNodeText(node).replace(/\r\n/g, "\n");
+                if (text.trim()) {
+                    text.split(/\n{2,}/).forEach((paragraph) => {
+                        fragments.push(`<p>${escapeHtml(paragraph).replace(/\n/g, "<br>")}</p>`);
+                    });
+                }
+            });
+
+            return fragments.join("") || "<p></p>";
         }
 
         function renderShelf() {
@@ -750,6 +1275,7 @@
         }
 
         function showShelf() {
+            authScreen.classList.add("hidden");
             shelfScreen.classList.remove("hidden");
             notebookScreen.classList.add("hidden");
             backToShelfBtnTop.style.display = "none";
@@ -757,9 +1283,63 @@
         }
 
         function showNotebookScreen() {
+            authScreen.classList.add("hidden");
             shelfScreen.classList.add("hidden");
             notebookScreen.classList.remove("hidden");
             backToShelfBtnTop.style.display = "inline-block";
+        }
+
+        function showAuthScreen() {
+            authScreen.classList.remove("hidden");
+            shelfScreen.classList.add("hidden");
+            notebookScreen.classList.add("hidden");
+            backToShelfBtnTop.style.display = "none";
+            createNotebookBtn.classList.add("hidden");
+            logoutBtn.classList.add("hidden");
+            currentUserLabel.classList.add("hidden");
+        }
+
+        function setAuthMode(mode) {
+            authMode = mode === "register" ? "register" : "login";
+            const isRegister = authMode === "register";
+
+            showLoginBtn.classList.toggle("is-active", !isRegister);
+            showRegisterBtn.classList.toggle("is-active", isRegister);
+            authNameField.classList.toggle("hidden", !isRegister);
+            authName.required = isRegister;
+            authTitle.textContent = isRegister ? "Crie sua conta" : "Entre na sua agenda";
+            authSubtitle.textContent = isRegister
+                ? "Seu acesso será pessoal e cada caderno ficará visível só para você."
+                : "Cada pessoa verá apenas os próprios cadernos e páginas.";
+            authSubmitBtn.textContent = isRegister ? "Criar conta" : "Entrar";
+            authPassword.autocomplete = isRegister ? "new-password" : "current-password";
+            setAuthStatus(isRegister
+                ? "Cadastre-se para começar a salvar seus próprios cadernos."
+                : "Faça login para acessar seus cadernos pessoais.");
+        }
+
+        function updateUserHeader() {
+            if (!currentUser) {
+                currentUserLabel.classList.add("hidden");
+                logoutBtn.classList.add("hidden");
+                createNotebookBtn.classList.add("hidden");
+                return;
+            }
+
+            currentUserLabel.textContent = `Olá, ${currentUser.name}`;
+            currentUserLabel.classList.remove("hidden");
+            logoutBtn.classList.remove("hidden");
+            createNotebookBtn.classList.remove("hidden");
+        }
+
+        function handleUnauthorized() {
+            currentUser = null;
+            currentNotebookId = null;
+            appData.notebooks = [];
+            updateUserHeader();
+            showAuthScreen();
+            setAuthMode("login");
+            setAuthStatus("Sua sessão terminou. Faça login novamente.", true);
         }
 
         function openNotebook(id) {
@@ -783,8 +1363,8 @@
             return {
                 leftIndex,
                 rightIndex,
-                leftPage: notebook.pages[leftIndex] || { title: "", content: "" },
-                rightPage: notebook.pages[rightIndex] || { title: "", content: "" }
+                leftPage: notebook.pages[leftIndex] || { title: "", content: createDefaultPageContent() },
+                rightPage: notebook.pages[rightIndex] || { title: "", content: createDefaultPageContent() }
             };
         }
 
@@ -799,8 +1379,10 @@
 
             leftPageTitle.value = spread.leftPage.title || "";
             rightPageTitle.value = spread.rightPage.title || "";
-            leftPageContent.value = spread.leftPage.content || "";
-            rightPageContent.value = spread.rightPage.content || "";
+            renderEditorContent(leftPageContent, spread.leftPage.content || "");
+            renderEditorContent(rightPageContent, spread.rightPage.content || "");
+            activeEditor = leftPageContent;
+            clearSelectedImage();
 
             pageCounter.textContent = `Folhas ${spread.leftIndex + 1} e ${spread.rightIndex + 1}`;
 
@@ -816,18 +1398,9 @@
                         <span>${number}</span>
                     </div>
                     <div class="page-snapshot-title">${escapeHtml(page.title || "")}</div>
-                    <div class="page-snapshot-body">${escapeHtml(page.content || "")}</div>
+                    <div class="page-snapshot-body">${getSnapshotMarkup(page.content || "")}</div>
                 </div>
             `;
-        }
-
-        function escapeHtml(value) {
-            return value
-                .replaceAll("&", "&amp;")
-                .replaceAll("<", "&lt;")
-                .replaceAll(">", "&gt;")
-                .replaceAll('"', "&quot;")
-                .replaceAll("'", "&#39;");
         }
 
         function animatePageTurn(direction, targetSpreadStart) {
@@ -884,7 +1457,7 @@
             while (notebook.pages.length <= index) {
                 notebook.pages.push({
                     title: `Página ${notebook.pages.length + 1}`,
-                    content: ""
+                    content: createDefaultPageContent()
                 });
             }
         }
@@ -896,9 +1469,186 @@
                 pages: notebook.pages.map((page, index) => ({
                     pageNumber: index + 1,
                     title: (page.title || "").trim(),
-                    content: page.content || ""
+                    content: page.content || createDefaultPageContent()
                 }))
             };
+        }
+
+        function focusEditor(editor) {
+            activeEditor = editor;
+            editor.focus();
+        }
+
+        function getEditorFromChild(target) {
+            return target.closest(".page")?.querySelector(".page-editor") || null;
+        }
+
+        function createFigureElement(src, align) {
+            const wrapper = document.createElement("div");
+            wrapper.innerHTML = createImageFigureMarkup({ src, align });
+            return wrapper.firstElementChild;
+        }
+
+        function selectImage(figure) {
+            document.querySelectorAll(".page-image.is-selected").forEach((item) => item.classList.remove("is-selected"));
+            if (figure) {
+                figure.classList.add("is-selected");
+            }
+        }
+
+        function clearSelectedImage() {
+            selectImage(null);
+        }
+
+        function getDropReference(editor, clientY) {
+            const children = Array.from(editor.children);
+            for (const child of children) {
+                if (child.classList.contains("page-image") && child.dataset.dragId === draggedImageId) {
+                    continue;
+                }
+
+                const rect = child.getBoundingClientRect();
+                if (clientY < rect.top + rect.height / 2) {
+                    return child;
+                }
+            }
+            return null;
+        }
+
+        function insertImageIntoEditor(editor, src, align) {
+            const figure = createFigureElement(src, align);
+            const selection = window.getSelection();
+            const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
+            const anchorNode = range?.startContainer;
+            const anchorBlock = anchorNode?.nodeType === Node.ELEMENT_NODE
+                ? anchorNode.closest?.("p, div")
+                : anchorNode?.parentElement?.closest("p, div");
+
+            if (anchorBlock && editor.contains(anchorBlock)) {
+                anchorBlock.insertAdjacentElement("beforebegin", figure);
+            } else {
+                editor.appendChild(figure);
+            }
+
+            ensureEditorStructure(editor);
+            selectImage(figure);
+            autoSave();
+        }
+
+        function readFileAsDataUrl(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = () => resolve(String(reader.result || ""));
+                reader.onerror = () => reject(new Error("Não foi possível ler a imagem selecionada."));
+                reader.readAsDataURL(file);
+            });
+        }
+
+        async function handleImageSelection() {
+            const [file] = imagePicker.files || [];
+            imagePicker.value = "";
+
+            if (!file) {
+                return;
+            }
+
+            if (!activeEditor) {
+                setStatus("Selecione primeiro a página onde a imagem será inserida.", true);
+                return;
+            }
+
+            try {
+                const dataUrl = await readFileAsDataUrl(file);
+                insertImageIntoEditor(activeEditor, dataUrl, pendingImageAlign);
+                setStatus("Imagem adicionada. Arraste para mover, use Esq/Dir para o lado e puxe o canto para redimensionar.");
+            } catch (error) {
+                handleError(error);
+            }
+        }
+
+        function startImageResize(event, figure) {
+            event.preventDefault();
+            event.stopPropagation();
+            const rect = figure.getBoundingClientRect();
+            resizingState = {
+                figure,
+                startX: event.clientX,
+                startWidth: rect.width
+            };
+        }
+
+        function handlePointerMove(event) {
+            if (!resizingState) {
+                return;
+            }
+
+            const nextWidth = clamp(resizingState.startWidth + (event.clientX - resizingState.startX), 120, 320);
+            resizingState.figure.dataset.width = Math.round(nextWidth);
+            resizingState.figure.style.width = `${Math.round(nextWidth)}px`;
+        }
+
+        function handlePointerUp() {
+            if (!resizingState) {
+                return;
+            }
+
+            resizingState = null;
+            autoSave();
+        }
+
+        async function submitAuth(event) {
+            event.preventDefault();
+
+            const payload = {
+                email: authEmail.value.trim(),
+                password: authPassword.value
+            };
+
+            if (authMode === "register") {
+                payload.name = authName.value.trim();
+            }
+
+            try {
+                setAuthStatus(authMode === "register" ? "Criando conta..." : "Entrando...");
+                const data = await fetchJson(`${API_BASE}/auth/${authMode === "register" ? "register" : "login"}`, {
+                    method: "POST",
+                    body: JSON.stringify(payload)
+                });
+
+                currentUser = data.user;
+                updateUserHeader();
+                authForm.reset();
+                await loadNotebooks();
+                showShelf();
+                setStatus("Sessão iniciada com sucesso.");
+                setAuthStatus(authMode === "register" ? "Conta criada com sucesso." : "Login realizado com sucesso.");
+            } catch (error) {
+                setAuthStatus(error.message || "Não foi possível entrar agora.", true);
+            }
+        }
+
+        async function logout() {
+            try {
+                await fetchJson(`${API_BASE}/auth/logout`, {
+                    method: "POST"
+                });
+            } catch (error) {
+                console.error(error);
+            }
+
+            currentUser = null;
+            currentNotebookId = null;
+            appData.notebooks = [];
+            updateUserHeader();
+            showAuthScreen();
+            setAuthMode("login");
+            setStatus("Você saiu da sua conta.");
+        }
+
+        async function loadNotebooks() {
+            const data = await fetchJson(`${API_BASE}/notebooks`);
+            appData.notebooks = data.notebooks || [];
+            renderShelf();
         }
 
         async function syncNotebook(notebook, successMessage = "Caderno salvo com sucesso.") {
@@ -925,9 +1675,9 @@
 
             notebook.title = notebookTitle.value.trim() || "Sem título";
             notebook.pages[leftIndex].title = leftPageTitle.value.trim();
-            notebook.pages[leftIndex].content = leftPageContent.value;
+            notebook.pages[leftIndex].content = serializeEditorContent(leftPageContent);
             notebook.pages[rightIndex].title = rightPageTitle.value.trim();
-            notebook.pages[rightIndex].content = rightPageContent.value;
+            notebook.pages[rightIndex].content = serializeEditorContent(rightPageContent);
 
             const savedNotebook = await syncNotebook(notebook, successMessage);
             notebookInfo.textContent = `${savedNotebook.pages.length} páginas salvas`;
@@ -973,8 +1723,8 @@
             try {
                 const currentLength = notebook.pages.length;
                 notebook.pages.push(
-                    { title: `Página ${currentLength + 1}`, content: "" },
-                    { title: `Página ${currentLength + 2}`, content: "" }
+                    { title: `Página ${currentLength + 1}`, content: createDefaultPageContent() },
+                    { title: `Página ${currentLength + 2}`, content: createDefaultPageContent() }
                 );
 
                 await syncNotebook(notebook, "Novas páginas adicionadas.");
@@ -1052,10 +1802,21 @@
 
         async function bootstrap() {
             try {
+                setStatus("Verificando sessão...");
+                const data = await fetchJson(`${API_BASE}/auth/me`);
+                currentUser = data.user || null;
+                updateUserHeader();
+
+                if (!currentUser) {
+                    showAuthScreen();
+                    setAuthMode("login");
+                    setStatus("Faça login para começar.");
+                    return;
+                }
+
                 setStatus("Carregando cadernos...");
-                const data = await fetchJson(`${API_BASE}/notebooks`);
-                appData.notebooks = data.notebooks || [];
-                renderShelf();
+                await loadNotebooks();
+                showShelf();
                 setStatus("Cadernos carregados.");
             } catch (error) {
                 handleError(error);
@@ -1065,7 +1826,16 @@
         createNotebookBtn.addEventListener("click", createNotebook);
         backToShelfBtn.addEventListener("click", goBackToShelf);
         backToShelfBtnTop.addEventListener("click", goBackToShelf);
+        logoutBtn.addEventListener("click", logout);
         addPagesBtn.addEventListener("click", addPages);
+        insertImageLeftBtn.addEventListener("click", () => {
+            pendingImageAlign = "left";
+            imagePicker.click();
+        });
+        insertImageRightBtn.addEventListener("click", () => {
+            pendingImageAlign = "right";
+            imagePicker.click();
+        });
         deleteNotebookBtn.addEventListener("click", deleteCurrentNotebook);
         saveBtn.addEventListener("click", async () => {
             try {
@@ -1076,15 +1846,148 @@
         });
         prevPagesBtn.addEventListener("click", goPrevPages);
         nextPagesBtn.addEventListener("click", goNextPages);
+        imagePicker.addEventListener("change", handleImageSelection);
+        document.addEventListener("pointermove", handlePointerMove);
+        document.addEventListener("pointerup", handlePointerUp);
+        showLoginBtn.addEventListener("click", () => setAuthMode("login"));
+        showRegisterBtn.addEventListener("click", () => setAuthMode("register"));
+        authForm.addEventListener("submit", submitAuth);
 
         [
             notebookTitle,
             leftPageTitle,
-            rightPageTitle,
-            leftPageContent,
-            rightPageContent
+            rightPageTitle
         ].forEach((el) => {
             el.addEventListener("input", autoSave);
+        });
+
+        [leftPageContent, rightPageContent].forEach((editor) => {
+            editor.addEventListener("focus", () => focusEditor(editor));
+            editor.addEventListener("click", (event) => {
+                focusEditor(editor);
+
+                const figure = event.target.closest(".page-image");
+                if (figure) {
+                    selectImage(figure);
+                    return;
+                }
+
+                clearSelectedImage();
+            });
+
+            editor.addEventListener("input", () => {
+                ensureEditorStructure(editor);
+                decorateEditorImages(editor);
+                autoSave();
+            });
+
+            editor.addEventListener("paste", (event) => {
+                event.preventDefault();
+                const text = event.clipboardData?.getData("text/plain") || "";
+                document.execCommand("insertText", false, text);
+            });
+
+            editor.addEventListener("dragstart", (event) => {
+                const figure = event.target.closest(".page-image");
+                if (!figure) {
+                    return;
+                }
+
+                draggedImageId = crypto.randomUUID();
+                figure.dataset.dragId = draggedImageId;
+                figure.classList.add("is-dragging");
+                event.dataTransfer.effectAllowed = "move";
+                event.dataTransfer.setData("text/plain", draggedImageId);
+                selectImage(figure);
+            });
+
+            editor.addEventListener("dragend", (event) => {
+                const figure = event.target.closest(".page-image");
+                if (figure) {
+                    figure.classList.remove("is-dragging");
+                    delete figure.dataset.dragId;
+                }
+                editor.classList.remove("page-image-drop-target");
+                draggedImageId = null;
+            });
+
+            editor.addEventListener("dragover", (event) => {
+                if (!draggedImageId) {
+                    return;
+                }
+
+                event.preventDefault();
+                editor.classList.add("page-image-drop-target");
+                event.dataTransfer.dropEffect = "move";
+            });
+
+            editor.addEventListener("dragleave", () => {
+                editor.classList.remove("page-image-drop-target");
+            });
+
+            editor.addEventListener("drop", (event) => {
+                if (!draggedImageId) {
+                    return;
+                }
+
+                event.preventDefault();
+                editor.classList.remove("page-image-drop-target");
+
+                const draggedFigure = document.querySelector(`.page-image[data-drag-id="${draggedImageId}"]`);
+                if (!draggedFigure) {
+                    draggedImageId = null;
+                    return;
+                }
+
+                const originEditor = getEditorFromChild(draggedFigure);
+                const reference = getDropReference(editor, event.clientY);
+                if (reference) {
+                    editor.insertBefore(draggedFigure, reference);
+                } else {
+                    editor.appendChild(draggedFigure);
+                }
+
+                draggedFigure.classList.remove("is-dragging");
+                delete draggedFigure.dataset.dragId;
+                draggedImageId = null;
+                ensureEditorStructure(editor);
+                if (originEditor && originEditor !== editor) {
+                    ensureEditorStructure(originEditor);
+                }
+                autoSave();
+            });
+
+            editor.addEventListener("mousedown", (event) => {
+                const action = event.target.dataset.imageAction;
+                const figure = event.target.closest(".page-image");
+                if (!action || !figure) {
+                    return;
+                }
+
+                if (action === "resize") {
+                    startImageResize(event, figure);
+                    return;
+                }
+
+                event.preventDefault();
+                selectImage(figure);
+
+                if (action === "left" || action === "right") {
+                    figure.dataset.align = action;
+                    autoSave();
+                    return;
+                }
+
+                if (action === "remove") {
+                    const editorOwner = getEditorFromChild(figure);
+                    figure.remove();
+                    if (editorOwner) {
+                        ensureEditorStructure(editorOwner);
+                    }
+                    clearSelectedImage();
+                    autoSave();
+                }
+            });
         });
 
         bootstrap();
