@@ -47,6 +47,21 @@
             z-index: 20;
         }
 
+        body.notebook-open .app-header {
+            position: static;
+            padding: 14px 24px;
+            background: rgba(255, 255, 255, 0.72);
+        }
+
+        body.notebook-open .app-header h1 {
+            font-size: 22px;
+            margin-bottom: 2px;
+        }
+
+        body.notebook-open .app-header p {
+            font-size: 13px;
+        }
+
         .app-header h1 {
             margin: 0 0 6px;
             font-size: 28px;
@@ -339,30 +354,50 @@
         .notebook-topbar {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            align-items: center;
+            gap: 16px;
+            align-items: flex-start;
             justify-content: space-between;
             margin-bottom: 20px;
+            padding: 18px 20px;
+            border-radius: 20px;
+            background: rgba(255, 253, 248, 0.82);
+            border: 1px solid rgba(111, 69, 40, 0.1);
+            box-shadow: 0 12px 26px rgba(80, 53, 28, 0.08);
         }
 
         .notebook-meta {
             display: flex;
             flex-direction: column;
             gap: 6px;
+            flex: 1 1 320px;
         }
 
         .notebook-meta input {
-            font-size: 24px;
+            font-size: 28px;
             font-weight: 700;
             border: none;
             outline: none;
             background: transparent;
             color: var(--ink);
-            width: min(460px, 90vw);
+            width: 100%;
+            max-width: 680px;
         }
 
         .notebook-meta small {
             color: #6d6155;
+            font-size: 14px;
+        }
+
+        .notebook-actions {
+            margin-top: 0;
+            align-items: flex-start;
+            justify-content: flex-end;
+            flex: 1 1 360px;
+        }
+
+        .notebook-actions button {
+            padding: 9px 12px;
+            font-size: 13px;
         }
 
         .book {
@@ -773,6 +808,15 @@
         }
 
         @media (max-width: 900px) {
+            .header-row {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .header-user {
+                align-items: flex-start;
+            }
+
             .book {
                 grid-template-columns: 1fr;
                 perspective: none;
@@ -812,6 +856,14 @@
             .notebook-card {
                 width: 90px;
                 height: 160px;
+            }
+
+            .notebook-topbar {
+                padding: 16px;
+            }
+
+            .notebook-meta input {
+                font-size: 24px;
             }
         }
     </style>
@@ -890,7 +942,7 @@
                         <input id="notebookTitle" type="text" placeholder="Título do caderno" />
                         <small id="notebookInfo">Caderno aberto</small>
                     </div>
-                    <div class="toolbar">
+                    <div class="toolbar notebook-actions">
                         <button class="btn-secondary" id="backToShelfBtn">Voltar à estante</button>
                         <button class="btn-success" id="addPagesBtn">Adicionar 2 páginas</button>
                         <button class="btn-secondary" id="insertImageLeftBtn">Imagem à esquerda</button>
@@ -1275,6 +1327,7 @@
         }
 
         function showShelf() {
+            document.body.classList.remove("notebook-open");
             authScreen.classList.add("hidden");
             shelfScreen.classList.remove("hidden");
             notebookScreen.classList.add("hidden");
@@ -1283,6 +1336,7 @@
         }
 
         function showNotebookScreen() {
+            document.body.classList.add("notebook-open");
             authScreen.classList.add("hidden");
             shelfScreen.classList.add("hidden");
             notebookScreen.classList.remove("hidden");
@@ -1290,6 +1344,7 @@
         }
 
         function showAuthScreen() {
+            document.body.classList.remove("notebook-open");
             authScreen.classList.remove("hidden");
             shelfScreen.classList.add("hidden");
             notebookScreen.classList.add("hidden");
