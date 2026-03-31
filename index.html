@@ -533,6 +533,14 @@
             z-index: 3;
         }
 
+        .page-image[data-align="left"] {
+            left: 12px;
+        }
+
+        .page-image[data-align="right"] {
+            right: 12px;
+        }
+
         .page-image img {
             display: block;
             width: 100%;
@@ -544,6 +552,21 @@
         .page-image.is-dragging {
             opacity: 0.55;
             cursor: grabbing;
+        }
+
+        .page-image-wrap {
+            width: 0;
+            height: 100%;
+            pointer-events: none;
+            opacity: 0;
+        }
+
+        .page-image-wrap[data-align="left"] {
+            float: left;
+        }
+
+        .page-image-wrap[data-align="right"] {
+            float: right;
         }
 
         .page-image-toolbar {
@@ -611,6 +634,14 @@
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 8px 18px rgba(80, 53, 28, 0.1);
+        }
+
+        .snapshot-image[data-align="left"] {
+            left: 12px;
+        }
+
+        .snapshot-image[data-align="right"] {
+            right: 12px;
         }
 
         .snapshot-image img {
@@ -1124,12 +1155,13 @@
             return node.innerText || node.textContent || "";
         }
 
-        function createImageFigureMarkup({ src, width = 220, x = 24, y = 24, alt = "" }) {
+        function createImageFigureMarkup({ src, width = 220, x = 24, y = 24, align = "left", alt = "" }) {
             const safeWidth = clamp(Number(width) || 220, 120, 320);
             const safeX = Math.max(0, Number(x) || 0);
             const safeY = Math.max(0, Number(y) || 0);
+            const safeAlign = align === "right" ? "right" : "left";
             return `
-                <figure class="page-image" contenteditable="false" data-width="${safeWidth}" data-x="${safeX}" data-y="${safeY}" style="width:${safeWidth}px; left:${safeX}px; top:${safeY}px;">
+                <figure class="page-image" contenteditable="false" data-width="${safeWidth}" data-x="${safeX}" data-y="${safeY}" data-align="${safeAlign}" style="width:${safeWidth}px; top:${safeY}px;">
                     <img src="${escapeHtml(src)}" alt="${escapeHtml(alt || "Imagem da página")}" />
                     <div class="page-image-toolbar">
                         <button type="button" class="image-tool-btn" data-image-action="remove">Rem</button>
@@ -1150,7 +1182,8 @@
                 alt: img.alt || "Imagem da página",
                 width: figure.dataset.width || figure.style.width,
                 x: figure.dataset.x || figure.style.left,
-                y: figure.dataset.y || figure.style.top
+                y: figure.dataset.y || figure.style.top,
+                align: figure.dataset.align || "left"
             });
         }
 
@@ -1165,17 +1198,19 @@
 
         function placeFigureWithinEditor(figure, editor, x, y) {
             const { width, height } = getFigureSize(figure);
-            const maxX = Math.max(0, editor.clientWidth - width);
             const maxY = Math.max(0, editor.clientHeight - height);
-            const safeX = clamp(Math.round(x), 0, maxX);
+            const safeX = clamp(Math.round(x), 0, Math.max(0, editor.clientWidth - width));
             const safeY = clamp(Math.round(y), 0, maxY);
+            const align = safeX + width / 2 >= editor.clientWidth / 2 ? "right" : "left";
 
             figure.dataset.width = String(width);
             figure.dataset.x = String(safeX);
             figure.dataset.y = String(safeY);
+            figure.dataset.align = align;
             figure.style.width = `${width}px`;
-            figure.style.left = `${safeX}px`;
             figure.style.top = `${safeY}px`;
+            figure.style.left = align === "left" ? "12px" : "auto";
+            figure.style.right = align === "right" ? "12px" : "auto";
         }
 
         function normalizeStoredContent(content) {
@@ -1201,6 +1236,10 @@
                     return;
                 }
 
+                if (node.nodeType === Node.ELEMENT_NODE && node.matches(".page-image-wrap")) {
+                    return;
+                }
+
                 const text = getNodeText(node).replace(/\r\n/g, "\n");
                 if (!text.trim()) {
                     return;
@@ -1221,6 +1260,10 @@
                     if (normalizedFigure) {
                         blocks.push(normalizedFigure);
                     }
+                    return;
+                }
+
+                if (node.nodeType === Node.ELEMENT_NODE && node.matches(".page-image-wrap")) {
                     return;
                 }
 
@@ -1248,7 +1291,9 @@
             }
 
             const hasTextBlock = Array.from(editor.childNodes).some((node) => {
-                return node.nodeType === Node.ELEMENT_NODE && !node.matches("figure.page-image");
+                return node.nodeType === Node.ELEMENT_NODE
+                    && !node.matches("figure.page-image")
+                    && !node.matches(".page-image-wrap");
             });
 
             if (!hasTextBlock) {
@@ -1259,6 +1304,8 @@
         }
 
         function decorateEditorImages(editor) {
+            editor.querySelectorAll(".page-image-wrap").forEach((wrap) => wrap.remove());
+
             editor.querySelectorAll("figure.page-image").forEach((figure) => {
                 figure.setAttribute("contenteditable", "false");
                 placeFigureWithinEditor(
@@ -1279,6 +1326,23 @@
                 if (!figure.querySelector(".image-resize-handle")) {
                     figure.insertAdjacentHTML("beforeend", `<div class="image-resize-handle" data-image-action="resize"></div>`);
                 }
+
+                const wrap = document.createElement("div");
+                const { width, height } = getFigureSize(figure);
+                const gap = 18;
+                const totalWidth = width + gap;
+                const wrapWidth = totalWidth;
+                const editorHeight = Math.max(editor.clientHeight, 1);
+                const top = clamp(Number(figure.dataset.y) || 0, 0, editorHeight);
+                const bottom = clamp(editorHeight - (top + height), 0, editorHeight);
+
+                wrap.className = "page-image-wrap";
+                wrap.dataset.align = figure.dataset.align || "left";
+                wrap.style.width = `${wrapWidth}px`;
+                wrap.style.height = `${editorHeight}px`;
+                wrap.style.shapeOutside = `inset(${top}px 0px ${bottom}px 0px)`;
+                wrap.style.webkitShapeOutside = `inset(${top}px 0px ${bottom}px 0px)`;
+                editor.insertBefore(wrap, editor.firstChild);
             });
         }
 
@@ -1295,10 +1359,10 @@
                     }
 
                     const width = clamp(Number(node.dataset.width) || 220, 120, 320);
-                    const x = Math.max(0, Number(node.dataset.x) || 0);
                     const y = Math.max(0, Number(node.dataset.y) || 0);
+                    const align = node.dataset.align === "right" ? "right" : "left";
                     fragments.push(`
-                        <figure class="snapshot-image" style="width:${width}px; left:${x}px; top:${y}px;">
+                        <figure class="snapshot-image" data-align="${align}" style="width:${width}px; top:${y}px;">
                             <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.alt || "Imagem da página")}" />
                         </figure>
                     `);
@@ -1614,7 +1678,7 @@
                 editor,
                 startX: event.clientX,
                 startY: event.clientY,
-                startLeft: parseInt(figure.style.left, 10) || 0,
+                startLeft: Number(figure.dataset.x) || 0,
                 startTop: parseInt(figure.style.top, 10) || 0
             };
             figure.classList.add("is-dragging");
@@ -1647,7 +1711,7 @@
                 return;
             }
 
-            const currentX = parseInt(resizingState.figure.style.left, 10) || 0;
+            const currentX = Number(resizingState.figure.dataset.x) || 0;
             const maxWidth = Math.max(120, Math.min(320, resizingState.editor.clientWidth - currentX));
             const nextWidth = clamp(resizingState.startWidth + (event.clientX - resizingState.startX), 120, maxWidth);
             resizingState.figure.dataset.width = String(Math.round(nextWidth));
