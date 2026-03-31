@@ -481,6 +481,7 @@
             min-height: 58vh;
             border: none;
             outline: none;
+            position: relative;
             background:
                 repeating-linear-gradient(to bottom,
                     transparent 0px,
@@ -504,6 +505,8 @@
         .page-editor p {
             margin: 0 0 8px;
             min-height: 30px;
+            position: relative;
+            z-index: 1;
         }
 
         .page-editor::after,
@@ -519,26 +522,15 @@
         }
 
         .page-image {
-            position: relative;
-            width: min(220px, 55%);
-            max-width: 55%;
-            min-width: 120px;
+            position: absolute;
+            width: 220px;
             border-radius: 14px;
             overflow: hidden;
             background: #f3eadc;
             border: 1px solid rgba(88, 66, 44, 0.14);
             box-shadow: 0 10px 24px rgba(80, 53, 28, 0.12);
-            clear: none;
-        }
-
-        .page-image[data-align="left"] {
-            float: left;
-            margin-right: 16px;
-        }
-
-        .page-image[data-align="right"] {
-            float: right;
-            margin-left: 16px;
+            cursor: grab;
+            z-index: 3;
         }
 
         .page-image img {
@@ -551,6 +543,7 @@
 
         .page-image.is-dragging {
             opacity: 0.55;
+            cursor: grabbing;
         }
 
         .page-image-toolbar {
@@ -600,38 +593,30 @@
             z-index: 2;
         }
 
-        .page-image-drop-target {
-            outline: 2px dashed rgba(111, 69, 40, 0.28);
-            outline-offset: 8px;
-        }
-
         .page-snapshot-body p {
             margin: 0 0 8px;
             min-height: 30px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page-snapshot-body {
+            position: relative;
+            min-height: 58vh;
         }
 
         .snapshot-image {
-            width: min(190px, 50%);
+            position: absolute;
+            width: 220px;
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 8px 18px rgba(80, 53, 28, 0.1);
-            margin-bottom: 12px;
         }
 
         .snapshot-image img {
             display: block;
             width: 100%;
             height: auto;
-        }
-
-        .snapshot-image.align-left {
-            float: left;
-            margin-right: 14px;
-        }
-
-        .snapshot-image.align-right {
-            float: right;
-            margin-left: 14px;
         }
 
         .book-controls {
@@ -945,8 +930,8 @@
                     <div class="toolbar notebook-actions">
                         <button class="btn-secondary" id="backToShelfBtn">Voltar à estante</button>
                         <button class="btn-success" id="addPagesBtn">Adicionar 2 páginas</button>
-                        <button class="btn-secondary" id="insertImageLeftBtn">Imagem à esquerda</button>
-                        <button class="btn-secondary" id="insertImageRightBtn">Imagem à direita</button>
+                        <button class="btn-secondary" id="insertImageLeftBtn">Adicionar imagem</button>
+                        <button class="btn-secondary hidden" id="insertImageRightBtn">Imagem à direita</button>
                         <button class="btn-danger" id="deleteNotebookBtn">Excluir caderno</button>
                     </div>
                 </div>
@@ -1043,8 +1028,7 @@
         let saveTimer = null;
         let isPageFlipping = false;
         let activeEditor = leftPageContent;
-        let pendingImageAlign = "left";
-        let draggedImageId = null;
+        let imageDragState = null;
         let resizingState = null;
         let authMode = "login";
 
@@ -1140,15 +1124,14 @@
             return node.innerText || node.textContent || "";
         }
 
-        function createImageFigureMarkup({ src, align = "left", width = 220, alt = "" }) {
-            const safeAlign = align === "right" ? "right" : "left";
+        function createImageFigureMarkup({ src, width = 220, x = 24, y = 24, alt = "" }) {
             const safeWidth = clamp(Number(width) || 220, 120, 320);
+            const safeX = Math.max(0, Number(x) || 0);
+            const safeY = Math.max(0, Number(y) || 0);
             return `
-                <figure class="page-image" contenteditable="false" draggable="true" data-align="${safeAlign}" data-width="${safeWidth}" style="width:${safeWidth}px;">
+                <figure class="page-image" contenteditable="false" data-width="${safeWidth}" data-x="${safeX}" data-y="${safeY}" style="width:${safeWidth}px; left:${safeX}px; top:${safeY}px;">
                     <img src="${escapeHtml(src)}" alt="${escapeHtml(alt || "Imagem da página")}" />
                     <div class="page-image-toolbar">
-                        <button type="button" class="image-tool-btn" data-image-action="left">Esq</button>
-                        <button type="button" class="image-tool-btn" data-image-action="right">Dir</button>
                         <button type="button" class="image-tool-btn" data-image-action="remove">Rem</button>
                     </div>
                     <div class="image-resize-handle" data-image-action="resize"></div>
@@ -1165,9 +1148,34 @@
             return createImageFigureMarkup({
                 src: img.src,
                 alt: img.alt || "Imagem da página",
-                align: figure.dataset.align || "left",
-                width: figure.dataset.width || figure.style.width
+                width: figure.dataset.width || figure.style.width,
+                x: figure.dataset.x || figure.style.left,
+                y: figure.dataset.y || figure.style.top
             });
+        }
+
+        function getFigureSize(figure) {
+            const width = clamp(Number(figure.dataset.width) || parseInt(figure.style.width, 10) || 220, 120, 320);
+            const img = figure.querySelector("img");
+            const naturalWidth = img?.naturalWidth || width;
+            const naturalHeight = img?.naturalHeight || width;
+            const height = Math.max(80, Math.round((width * naturalHeight) / naturalWidth));
+            return { width, height };
+        }
+
+        function placeFigureWithinEditor(figure, editor, x, y) {
+            const { width, height } = getFigureSize(figure);
+            const maxX = Math.max(0, editor.clientWidth - width);
+            const maxY = Math.max(0, editor.clientHeight - height);
+            const safeX = clamp(Math.round(x), 0, maxX);
+            const safeY = clamp(Math.round(y), 0, maxY);
+
+            figure.dataset.width = String(width);
+            figure.dataset.x = String(safeX);
+            figure.dataset.y = String(safeY);
+            figure.style.width = `${width}px`;
+            figure.style.left = `${safeX}px`;
+            figure.style.top = `${safeY}px`;
         }
 
         function normalizeStoredContent(content) {
@@ -1253,16 +1261,16 @@
         function decorateEditorImages(editor) {
             editor.querySelectorAll("figure.page-image").forEach((figure) => {
                 figure.setAttribute("contenteditable", "false");
-                figure.setAttribute("draggable", "true");
-                figure.dataset.align = figure.dataset.align === "right" ? "right" : "left";
-                figure.dataset.width = clamp(Number(figure.dataset.width) || parseInt(figure.style.width, 10) || 220, 120, 320);
-                figure.style.width = `${figure.dataset.width}px`;
+                placeFigureWithinEditor(
+                    figure,
+                    editor,
+                    Number(figure.dataset.x) || parseInt(figure.style.left, 10) || 24,
+                    Number(figure.dataset.y) || parseInt(figure.style.top, 10) || 24
+                );
 
                 if (!figure.querySelector(".page-image-toolbar")) {
                     figure.insertAdjacentHTML("beforeend", `
                         <div class="page-image-toolbar">
-                            <button type="button" class="image-tool-btn" data-image-action="left">Esq</button>
-                            <button type="button" class="image-tool-btn" data-image-action="right">Dir</button>
                             <button type="button" class="image-tool-btn" data-image-action="remove">Rem</button>
                         </div>
                     `);
@@ -1286,9 +1294,11 @@
                         return;
                     }
 
-                    const align = node.dataset.align === "right" ? "right" : "left";
+                    const width = clamp(Number(node.dataset.width) || 220, 120, 320);
+                    const x = Math.max(0, Number(node.dataset.x) || 0);
+                    const y = Math.max(0, Number(node.dataset.y) || 0);
                     fragments.push(`
-                        <figure class="snapshot-image align-${align}">
+                        <figure class="snapshot-image" style="width:${width}px; left:${x}px; top:${y}px;">
                             <img src="${escapeHtml(img.src)}" alt="${escapeHtml(img.alt || "Imagem da página")}" />
                         </figure>
                     `);
@@ -1538,9 +1548,9 @@
             return target.closest(".page")?.querySelector(".page-editor") || null;
         }
 
-        function createFigureElement(src, align) {
+        function createFigureElement(src) {
             const wrapper = document.createElement("div");
-            wrapper.innerHTML = createImageFigureMarkup({ src, align });
+            wrapper.innerHTML = createImageFigureMarkup({ src });
             return wrapper.firstElementChild;
         }
 
@@ -1555,37 +1565,11 @@
             selectImage(null);
         }
 
-        function getDropReference(editor, clientY) {
-            const children = Array.from(editor.children);
-            for (const child of children) {
-                if (child.classList.contains("page-image") && child.dataset.dragId === draggedImageId) {
-                    continue;
-                }
-
-                const rect = child.getBoundingClientRect();
-                if (clientY < rect.top + rect.height / 2) {
-                    return child;
-                }
-            }
-            return null;
-        }
-
-        function insertImageIntoEditor(editor, src, align) {
-            const figure = createFigureElement(src, align);
-            const selection = window.getSelection();
-            const range = selection?.rangeCount ? selection.getRangeAt(0) : null;
-            const anchorNode = range?.startContainer;
-            const anchorBlock = anchorNode?.nodeType === Node.ELEMENT_NODE
-                ? anchorNode.closest?.("p, div")
-                : anchorNode?.parentElement?.closest("p, div");
-
-            if (anchorBlock && editor.contains(anchorBlock)) {
-                anchorBlock.insertAdjacentElement("beforebegin", figure);
-            } else {
-                editor.appendChild(figure);
-            }
-
+        function insertImageIntoEditor(editor, src) {
+            const figure = createFigureElement(src);
+            editor.appendChild(figure);
             ensureEditorStructure(editor);
+            placeFigureWithinEditor(figure, editor, 24, 24);
             selectImage(figure);
             autoSave();
         }
@@ -1614,11 +1598,26 @@
 
             try {
                 const dataUrl = await readFileAsDataUrl(file);
-                insertImageIntoEditor(activeEditor, dataUrl, pendingImageAlign);
-                setStatus("Imagem adicionada. Arraste para mover, use Esq/Dir para o lado e puxe o canto para redimensionar.");
+                insertImageIntoEditor(activeEditor, dataUrl);
+                setStatus("Imagem adicionada. Arraste livremente pela folha e use o canto para redimensionar.");
             } catch (error) {
                 handleError(error);
             }
+        }
+
+        function startImageDrag(event, figure, editor) {
+            event.preventDefault();
+            event.stopPropagation();
+            const rect = figure.getBoundingClientRect();
+            imageDragState = {
+                figure,
+                editor,
+                startX: event.clientX,
+                startY: event.clientY,
+                startLeft: parseInt(figure.style.left, 10) || 0,
+                startTop: parseInt(figure.style.top, 10) || 0
+            };
+            figure.classList.add("is-dragging");
         }
 
         function startImageResize(event, figure) {
@@ -1627,22 +1626,47 @@
             const rect = figure.getBoundingClientRect();
             resizingState = {
                 figure,
+                editor: getEditorFromChild(figure),
                 startX: event.clientX,
                 startWidth: rect.width
             };
         }
 
         function handlePointerMove(event) {
+            if (imageDragState) {
+                placeFigureWithinEditor(
+                    imageDragState.figure,
+                    imageDragState.editor,
+                    imageDragState.startLeft + (event.clientX - imageDragState.startX),
+                    imageDragState.startTop + (event.clientY - imageDragState.startY)
+                );
+                return;
+            }
+
             if (!resizingState) {
                 return;
             }
 
-            const nextWidth = clamp(resizingState.startWidth + (event.clientX - resizingState.startX), 120, 320);
-            resizingState.figure.dataset.width = Math.round(nextWidth);
-            resizingState.figure.style.width = `${Math.round(nextWidth)}px`;
+            const currentX = parseInt(resizingState.figure.style.left, 10) || 0;
+            const maxWidth = Math.max(120, Math.min(320, resizingState.editor.clientWidth - currentX));
+            const nextWidth = clamp(resizingState.startWidth + (event.clientX - resizingState.startX), 120, maxWidth);
+            resizingState.figure.dataset.width = String(Math.round(nextWidth));
+            placeFigureWithinEditor(
+                resizingState.figure,
+                resizingState.editor,
+                currentX,
+                parseInt(resizingState.figure.style.top, 10) || 0
+            );
         }
 
         function handlePointerUp() {
+            if (imageDragState) {
+                imageDragState.figure.classList.remove("is-dragging");
+                imageDragState = null;
+                autoSave();
+                return;
+            }
+
             if (!resizingState) {
                 return;
             }
@@ -1883,14 +1907,8 @@
         backToShelfBtnTop.addEventListener("click", goBackToShelf);
         logoutBtn.addEventListener("click", logout);
         addPagesBtn.addEventListener("click", addPages);
-        insertImageLeftBtn.addEventListener("click", () => {
-            pendingImageAlign = "left";
-            imagePicker.click();
-        });
-        insertImageRightBtn.addEventListener("click", () => {
-            pendingImageAlign = "right";
-            imagePicker.click();
-        });
+        insertImageLeftBtn.addEventListener("click", () => imagePicker.click());
+        insertImageRightBtn.addEventListener("click", () => imagePicker.click());
         deleteNotebookBtn.addEventListener("click", deleteCurrentNotebook);
         saveBtn.addEventListener("click", async () => {
             try {
@@ -1942,80 +1960,18 @@
                 document.execCommand("insertText", false, text);
             });
 
-            editor.addEventListener("dragstart", (event) => {
+            editor.addEventListener("mousedown", (event) => {
+                const action = event.target.dataset.imageAction;
                 const figure = event.target.closest(".page-image");
                 if (!figure) {
                     return;
                 }
 
-                draggedImageId = crypto.randomUUID();
-                figure.dataset.dragId = draggedImageId;
-                figure.classList.add("is-dragging");
-                event.dataTransfer.effectAllowed = "move";
-                event.dataTransfer.setData("text/plain", draggedImageId);
+                focusEditor(editor);
                 selectImage(figure);
-            });
 
-            editor.addEventListener("dragend", (event) => {
-                const figure = event.target.closest(".page-image");
-                if (figure) {
-                    figure.classList.remove("is-dragging");
-                    delete figure.dataset.dragId;
-                }
-                editor.classList.remove("page-image-drop-target");
-                draggedImageId = null;
-            });
-
-            editor.addEventListener("dragover", (event) => {
-                if (!draggedImageId) {
-                    return;
-                }
-
-                event.preventDefault();
-                editor.classList.add("page-image-drop-target");
-                event.dataTransfer.dropEffect = "move";
-            });
-
-            editor.addEventListener("dragleave", () => {
-                editor.classList.remove("page-image-drop-target");
-            });
-
-            editor.addEventListener("drop", (event) => {
-                if (!draggedImageId) {
-                    return;
-                }
-
-                event.preventDefault();
-                editor.classList.remove("page-image-drop-target");
-
-                const draggedFigure = document.querySelector(`.page-image[data-drag-id="${draggedImageId}"]`);
-                if (!draggedFigure) {
-                    draggedImageId = null;
-                    return;
-                }
-
-                const originEditor = getEditorFromChild(draggedFigure);
-                const reference = getDropReference(editor, event.clientY);
-                if (reference) {
-                    editor.insertBefore(draggedFigure, reference);
-                } else {
-                    editor.appendChild(draggedFigure);
-                }
-
-                draggedFigure.classList.remove("is-dragging");
-                delete draggedFigure.dataset.dragId;
-                draggedImageId = null;
-                ensureEditorStructure(editor);
-                if (originEditor && originEditor !== editor) {
-                    ensureEditorStructure(originEditor);
-                }
-                autoSave();
-            });
-
-            editor.addEventListener("mousedown", (event) => {
-                const action = event.target.dataset.imageAction;
-                const figure = event.target.closest(".page-image");
-                if (!action || !figure) {
+                if (!action) {
+                    startImageDrag(event, figure, editor);
                     return;
                 }
 
@@ -2025,13 +1981,6 @@
                 }
 
                 event.preventDefault();
-                selectImage(figure);
-
-                if (action === "left" || action === "right") {
-                    figure.dataset.align = action;
-                    autoSave();
-                    return;
-                }
 
                 if (action === "remove") {
                     const editorOwner = getEditorFromChild(figure);
